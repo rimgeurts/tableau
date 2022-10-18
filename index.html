@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="https://sliceofkeesh.com/favicon.ico" />
+    <title>Data Source Mapper</title>
+    <link rel="stylesheet" href="./style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <script src="https://cdn.jsdelivr.net/gh/Stuk/jszip@master/dist/jszip.min.js"></script>
+    <script src="./script.js" defer></script>
+  </head>
+
+  <body>
+    <section class="section" id="app">
+      <div class="container">
+        <h1 class="title has-text-centered">Tableau Data Source Mapper</h1>
+        <p class="subtitle has-text-centered">
+          Add your Tableau workbook below to see how its data sources are being
+          used!
+        </p>
+        <p class="subtitle is-size-7 has-text-centered">
+          This tool is safe to use with sensitive data. Nothing is being
+          transmitted and everything happens within your browser. You can even
+          turn off your wifi/internet after loading this page and it will still
+          work.
+          <br /> <br />
+          Take a look at the
+          <a
+            href="https://glitch.com/edit/#!/twb-data-source-mapper?path=script.js"
+            target="_blank"
+            >source code</a
+          >
+          or read my
+          <a
+            href="https://sliceofkeesh.com/post/tableau-data-source-mapper"
+            target="_blank"
+            >blog post</a
+          >
+          to learn more. <br /><br />
+          <b
+            >Found this useful? I don't collect any data on this page, even
+            analytics, so
+            <a href="mailto:keshia@sliceofkeesh.com" target="_blank"
+              >drop me a line</a
+            >
+            and let
+            <a href="https://twitter.com/KroseKeshia" target="_blank">me</a>
+            know! 🙂</b
+          >
+        </p>
+        <div class="block" v-cloak>
+          <div class="file has-name is-fullwidth">
+            <label class="file-label">
+              <input
+                class="file-input"
+                type="file"
+                accept=".twb,.twbx"
+                @change="processFile($event)"
+              />
+              <span class="file-cta">
+                <span class="file-label">Select a .twb or .twbx</span>
+              </span>
+              <span class="file-name">{{fileName}}</span>
+            </label>
+          </div>
+          <p class="error">{{errorMessage}}</p>
+        </div>
+        <div class="mb-1" v-if="sheetMap.length>0 || fieldMap.length >0">
+          <div class="tabs is-boxed">
+            <ul>
+              <li :class="currentTab===1 ? 'is-active' : ''">
+                <a @click="currentTab=1">
+                  <span>Sheets</span>
+                </a>
+              </li>
+              <li :class="currentTab===2 ? 'is-active' : ''">
+                <a @click="currentTab=2">
+                  <span>Fields</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="block" v-if="currentTab===1" v-cloak>
+          <div class="block" v-for="dataSource in sheetMap">
+            <p class="dataSource">{{dataSource.dsName}}</p>
+            <p class="sheet" v-for="sheet in dataSource.sheets">
+              <img
+                class="tabicon"
+                :src="'https://cdn.glitch.global/945b8f26-7039-4242-b7b8-583646c92829/' + sheet.type + '.png'"
+              />{{sheet.name}}
+            </p>
+          </div>
+        </div>
+        <div class="block" v-if="currentTab===2" v-cloak>
+          <label class="checkbox wholeWidth is-size-7 mb-1 has-text-right">
+            <input type="checkbox" v-model="showSheets" />
+            Show worksheets & calculations where fields are used
+          </label>
+          <div class="block" v-for="dataSource in fieldMap">
+            <p class="dataSource">{{dataSource.dsName}}</p>
+            <div class="sheet" v-for="field in dataSource.fields">
+              <p :title="field.calc">
+                <img
+                  class="tabicon"
+                  :src="'https://cdn.glitch.global/945b8f26-7039-4242-b7b8-583646c92829/' + field.type + '.png'"
+                />{{field.name}}
+              </p>
+              <span v-if="showSheets">
+                <p class="fieldSheet" v-for="ws in field.worksheets">{{ws}}</p>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>
